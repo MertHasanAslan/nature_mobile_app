@@ -17,6 +17,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cs_projesi/firebase/firebase_service.dart';
 import 'firebase_options.dart';
 
+/*
 Future<void> ensureDummyDataUploaded() async {
   final firebaseService = FirebaseService();
   try {
@@ -26,6 +27,7 @@ Future<void> ensureDummyDataUploaded() async {
     print('Error uploading dummy data: $e');
   }
 }
+*/
 
 void main() async {
   try {
@@ -33,7 +35,7 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    await ensureDummyDataUploaded();
+    // await ensureDummyDataUploaded();
   } catch (e) {
     print('Error initializing Firebase: $e');
   }
