@@ -24,7 +24,10 @@ class ShowOnMapPage extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ProfilePage(user: profile),
+        builder: (context) => ProfilePage(
+          user: profile,
+          isOwnProfile: false,
+        ),
       ),
     );
   }

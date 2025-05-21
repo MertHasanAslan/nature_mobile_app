@@ -73,13 +73,13 @@ class SettingsPage extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         children: [
           _buildTile(MdiIcons.accountMultiple, 'Followings', () {
-            // Navigate to followings
+            Navigator.of(context).pushNamed('/FollowingsPage');
           }),
           _buildTile(MdiIcons.accountEdit, 'Edit Profile', () {
-            // Navigate to edit profile
+            Navigator.of(context).pushNamed('/EditProfilePage');
           }),
           _buildTile(MdiIcons.lock, 'Privacy', () {
-            // Navigate to privacy settings
+            Navigator.of(context).pushNamed('/PrivacyPage');
           }),
           _buildTile(MdiIcons.phone, 'Contact Us', () {
             Navigator.of(context).push(

@@ -16,6 +16,7 @@ class EventPageUtility {
               letterSpacing: -0.7,
               fontWeight: FontWeight.w900,
             ),
+            textAlign: TextAlign.left,
           ),
           Text(
             content,
@@ -27,6 +28,7 @@ class EventPageUtility {
               fontWeight: FontWeight.w500,
               height: 1.1,
             ),
+            textAlign: TextAlign.left,
           ),
           SizedBox(height: 1),
         ],

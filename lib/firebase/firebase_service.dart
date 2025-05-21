@@ -157,6 +157,24 @@ class FirebaseService {
     return await ref.getDownloadURL();
   }
 
+  Future<void> updateProfile(String userId, Map<String, dynamic> data) async {
+    try {
+      await _firestore.collection('profiles').doc(userId).update(data);
+    } catch (e) {
+      print('Error updating profile: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> deleteEvent(String eventId) async {
+    try {
+      await _firestore.collection('events').doc(eventId).delete();
+    } catch (e) {
+      print('Error deleting event: $e');
+      rethrow;
+    }
+  }
+
   /*
   // Upload Dummy Data - Artık kullanılmıyor
   Future<void> uploadDummyData() async {

@@ -1,190 +1,74 @@
 import 'package:flutter/material.dart';
-import 'package:cs_projesi/models/profile.dart';
-import 'package:cs_projesi/models/event.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cs_projesi/providers/auth_provider.dart';
+import 'package:cs_projesi/providers/events_provider.dart';
+import 'package:cs_projesi/providers/profiles_provider.dart';
 import 'package:cs_projesi/widgets/eventCardWidget.dart';
 import 'package:cs_projesi/widgets/storyBarWidget.dart';
 import 'package:cs_projesi/widgets/navigationBarWidget.dart';
-import 'package:cs_projesi/firebase/firebase_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+class HomePage extends ConsumerWidget {
+  const HomePage({super.key});
 
   @override
-  _HomePageState createState() => _HomePageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final eventsAsync = ref.watch(eventsProvider);
+    final currentProfileAsync = ref.watch(currentUserProfileProvider);
 
-class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 2;
-  final FirebaseService _firebaseService = FirebaseService();
-  String? userName;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadUserName();
-  }
-
-  Future<void> _loadUserName() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      final profile = await _firebaseService.getProfile(user.uid);
-      setState(() {
-        userName = profile?.name ?? '';
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-          preferredSize: Size.fromHeight(5),
-          child: AppBar()),
-      body: Stack(
+      appBar: AppBar(
+        title: const Text('NatureSync'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              Navigator.pushNamed(context, '/EventAddPage');
+            },
+          ),
+        ],
+      ),
+      body: Column(
         children: [
-          SafeArea(
-            child: Padding(
-              padding: EdgeInsets.only(left:10, right: 20, bottom: 15),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                          onPressed: (){
-                            Navigator.pop(context);
-                          },
-                          icon: Icon(Icons.arrow_back)),
-                      Padding(
-                        padding: EdgeInsets.only(right: 2),
-                        child: Text(
-                          userName != null && userName!.isNotEmpty ? "Hi, $userName" : "Hi",
-                          overflow: TextOverflow.clip,
-                          style: TextStyle(
-                            fontFamily: 'RobotoSerif',
-                            fontSize: 18,
-                            color: Colors.black45,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(left: 15, top: 5),
-                        child: Text(
-                          "Followings",
-                          style: TextStyle(
-                            fontFamily: 'RobotoSerif',
-                            fontSize: 18,
-                            color: Colors.black87,
-                            letterSpacing: -1,
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                  StoryBarWidget(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(left: 15),
-                        child: Text(
-                          "Activities",
-                          style: TextStyle(
-                            fontFamily: 'RobotoSerif',
-                            fontSize: 24,
-                            color: Colors.black87,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: -1,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Expanded(
-                    child: StreamBuilder<List<Event>>(
-                      stream: _firebaseService.getEvents(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasError) {
-                          return Center(child: Text('Error: \\${snapshot.error}'));
-                        }
-
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return Center(child: CircularProgressIndicator());
-                        }
-
-                        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                          return Center(child: Text('No events found'));
-                        }
-
-                        return FutureBuilder<List<Event>>(
-                          future: _filterEventsWithProfileHasEvent(snapshot.data!),
-                          builder: (context, filteredSnapshot) {
-                            if (!filteredSnapshot.hasData) {
-                              return Center(child: CircularProgressIndicator());
-                            }
-                            final filteredEvents = filteredSnapshot.data!;
-                            if (filteredEvents.isEmpty) {
-                              return Center(child: Text('No valid events found'));
-                            }
-                            return ListView.builder(
-                              itemCount: filteredEvents.length,
-                              itemBuilder: (context, index) {
-                                return EventCardWidget(event: filteredEvents[index]);
-                              },
-                            );
-                          },
+          // Story Bar
+          const StoryBarWidget(),
+          
+          // Events List
+          Expanded(
+            child: eventsAsync.when(
+              data: (events) {
+                if (events.isEmpty) {
+                  return const Center(
+                    child: Text('No events available'),
+                  );
+                }
+                return ListView.builder(
+                  itemCount: events.length,
+                  itemBuilder: (context, index) {
+                    final event = events[index];
+                    return EventCardWidget(
+                      event: event,
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          '/EventPage',
+                          arguments: event,
                         );
                       },
-                    ),
-                  ),
-                ],
+                    );
+                  },
+                );
+              },
+              loading: () => const Center(
+                child: CircularProgressIndicator(),
+              ),
+              error: (error, stack) => Center(
+                child: Text('Error: ${error.toString()}'),
               ),
             ),
           ),
-          Align(
-            alignment: Alignment.topCenter,
-            child: Padding(
-              padding: EdgeInsets.only(top: 0.1),
-              child: IconButton(
-                onPressed: (){},
-                icon: Icon(Icons.notifications_none_sharp),
-                iconSize: 25,
-              ),
-            ),
-          )
         ],
       ),
-      bottomNavigationBar: NavigationBarNature(
-        selectedIndex: _selectedIndex,
-      ),
+      bottomNavigationBar: const NavigationBarNature(selectedIndex: 2),
     );
-  }
-
-  Future<List<Event>> _filterEventsWithProfileHasEvent(List<Event> events) async {
-    List<Event> filtered = [];
-    for (final event in events) {
-      if (event.id.startsWith('map_')) continue; // skip map events
-      try {
-        final profile = await _firebaseService.getProfile(event.createdBy);
-        if (profile != null && profile.hasEvent == true) {
-          if (event.descriptionMini != null &&
-              event.eventPhotoPath != null &&
-              event.location != null &&
-              event.createdBy != null) {
-            filtered.add(event);
-          }
-        }
-      } catch (e) {
-        // skip problematic events
-        continue;
-      }
-    }
-    return filtered;
   }
 }

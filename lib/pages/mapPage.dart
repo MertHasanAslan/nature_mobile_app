@@ -24,7 +24,10 @@ class MapPage extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ProfilePage(user: profile),
+        builder: (context) => ProfilePage(
+          user: profile,
+          isOwnProfile: false,
+        ),
       ),
     );
   }
@@ -33,14 +36,14 @@ class MapPage extends StatelessWidget {
     final firebaseService = FirebaseService();
     List<Event> filtered = [];
     for (final event in events) {
-      if (event.id.startsWith('map_')) continue; // skip map events, show only real events
       try {
         final profile = await firebaseService.getProfile(event.createdBy);
-        if (profile != null && profile.hasEvent == true) {
+        if (profile != null) {
           if (event.descriptionMini != null &&
               event.eventPhotoPath != null &&
               event.location != null &&
-              event.createdBy != null) {
+              event.createdBy != null &&
+              event.coordinates != null) {
             filtered.add(event);
           }
         }

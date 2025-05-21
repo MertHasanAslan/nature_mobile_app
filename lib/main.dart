@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cs_projesi/models/profile.dart';
 import 'package:cs_projesi/models/event.dart';
 import 'package:cs_projesi/widgets/eventCardWidget.dart';
@@ -16,6 +17,10 @@ import 'package:cs_projesi/pages/mapPage.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cs_projesi/firebase/firebase_service.dart';
 import 'firebase_options.dart';
+import 'package:cs_projesi/pages/FollowingsPage.dart';
+import 'package:cs_projesi/pages/EditProfilePage.dart';
+import 'package:cs_projesi/pages/PrivacyPage.dart';
+import 'package:cs_projesi/pages/EventAddPage.dart';
 
 /*
 Future<void> ensureDummyDataUploaded() async {
@@ -30,16 +35,13 @@ Future<void> ensureDummyDataUploaded() async {
 */
 
 void main() async {
-  try {
-    WidgetsFlutterBinding.ensureInitialized();
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-    // await ensureDummyDataUploaded();
-  } catch (e) {
-    print('Error initializing Firebase: $e');
-  }
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -74,6 +76,10 @@ class MyApp extends StatelessWidget {
           }
           return Scaffold(body: Center(child: Text('No profile data')));
         },
+        '/FollowingsPage': (context) => const FollowingsPage(),
+        '/EditProfilePage': (context) => const EditProfilePage(),
+        '/PrivacyPage': (context) => const PrivacyPage(),
+        '/EventAddPage': (context) => const EventAddPage(),
       },
     );
   }
